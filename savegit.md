@@ -7,3 +7,9 @@
     git commit -m "update .gitignore and code"
 
     git push
+
+
+ลบ
+git add .
+git commit -m "Security: Remove service account key from repo"
+git push
