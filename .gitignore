@@ -1,2 +1,14 @@
+# 1. โฟลเดอร์ขยะของ Node.js (มีขนาดใหญ่มากและสร้างใหม่ได้ตลอด)
 node_modules/
+
+# 2. ไฟล์ความลับ (ที่มีรหัสผ่านและ API Tokens)
 .env
+
+# 3. ไฟล์ Log ต่างๆ
+npm-debug.log*
+
+# 4. ไฟล์ระบบของคอมพิวเตอร์
+.DS_Store
+Thumbs.db
+
+serviceAccountKey.json
