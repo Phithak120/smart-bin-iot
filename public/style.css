@@ -1,48 +1,80 @@
 /* ================================================================
-   SMART BIN  ·  CYBER TERMINAL THEME  ·  style.css
+   SMART BIN  ·  CYBER TERMINAL ADAPTIVE  ·  style.css
    ================================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Sarabun:wght@300;400;600&family=Share+Tech+Mono&display=swap');
 
-/* ── VARIABLES ─────────────────────────────────────────────── */
+/* ── LIGHT MODE DEFAULT (ค่าเริ่มต้น) ─────────────────────── */
 :root {
-    --bg: #03050a;
-    --bg2: #060c14;
-    --panel: #080e18;
-    --panel2: #0b1220;
-    --border: #0e2a3d;
-    --border2: #1a3f5c;
+    --bg: #eef2f7;
+    --bg2: #e2e8f0;
+    --panel: #ffffff;
+    --panel2: #f1f5fb;
+    --border: #c8d8e8;
+    --border2: #a0bbcc;
 
-    --cyan: #00e5ff;
-    --cyan-dim: #0099bb;
-    --cyan-glow: rgba(0, 229, 255, 0.2);
-    --cyan-soft: rgba(0, 229, 255, 0.07);
+    --cyan: #0088cc;
+    --cyan-dim: #006699;
+    --cyan-glow: rgba(0, 136, 204, 0.2);
+    --cyan-soft: rgba(0, 136, 204, 0.07);
 
-    --green: #00ff88;
-    --green-dim: #00bb66;
-    --green-glow: rgba(0, 255, 136, 0.2);
-    --green-soft: rgba(0, 255, 136, 0.07);
+    --green: #059669;
+    --green-dim: #047857;
+    --green-glow: rgba(5, 150, 105, 0.2);
+    --green-soft: rgba(5, 150, 105, 0.07);
 
-    --warn: #ffaa00;
-    --warn-glow: rgba(255, 170, 0, 0.25);
-    --warn-soft: rgba(255, 170, 0, 0.08);
+    --warn: #d97706;
+    --warn-glow: rgba(217, 119, 6, 0.25);
+    --warn-soft: rgba(217, 119, 6, 0.08);
 
-    --danger: #ff2255;
-    --danger-glow: rgba(255, 34, 85, 0.25);
-    --danger-soft: rgba(255, 34, 85, 0.08);
+    --danger: #dc2626;
+    --danger-glow: rgba(220, 38, 38, 0.25);
+    --danger-soft: rgba(220, 38, 38, 0.08);
 
-    --text: #cce8f0;
-    --text2: #6a9ab0;
-    --muted: #2e5a72;
+    --text: #0d1f2d;
+    --text2: #3a5a72;
+    --muted: #7a9ab0;
 
     --mono: 'Share Tech Mono', monospace;
     --title: 'Orbitron', sans-serif;
     --sans: 'Sarabun', sans-serif;
-
-    --r: 0px;
 }
 
-/* ── RESET ─────────────────────────────────────────────────── */
+/* ── DARK MODE OVERRIDE ─────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #03050a;
+        --bg2: #060c14;
+        --panel: #080e18;
+        --panel2: #0b1220;
+        --border: #0e2a3d;
+        --border2: #1a3f5c;
+
+        --cyan: #00e5ff;
+        --cyan-dim: #0099bb;
+        --cyan-glow: rgba(0, 229, 255, 0.2);
+        --cyan-soft: rgba(0, 229, 255, 0.07);
+
+        --green: #00ff88;
+        --green-dim: #00bb66;
+        --green-glow: rgba(0, 255, 136, 0.2);
+        --green-soft: rgba(0, 255, 136, 0.07);
+
+        --warn: #ffaa00;
+        --warn-glow: rgba(255, 170, 0, 0.25);
+        --warn-soft: rgba(255, 170, 0, 0.08);
+
+        --danger: #ff2255;
+        --danger-glow: rgba(255, 34, 85, 0.25);
+        --danger-soft: rgba(255, 34, 85, 0.08);
+
+        --text: #cce8f0;
+        --text2: #6a9ab0;
+        --muted: #2e5a72;
+    }
+}
+
+/* ── RESET ──────────────────────────────────────────────────── */
 *,
 *::before,
 *::after {
@@ -55,7 +87,7 @@ html {
     scroll-behavior: smooth;
 }
 
-/* ── BODY ──────────────────────────────────────────────────── */
+/* ── BODY ───────────────────────────────────────────────────── */
 body {
     font-family: var(--sans);
     background: var(--bg);
@@ -65,37 +97,65 @@ body {
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     cursor: default;
+    transition: background 0.5s ease, color 0.5s ease;
 }
 
-/* Deep space background */
+/* Ambient background glow — light */
 body::before {
     content: '';
     position: fixed;
     inset: 0;
     z-index: 0;
     background:
-        radial-gradient(ellipse 60% 50% at 0% 0%, rgba(0, 100, 180, 0.12) 0%, transparent 60%),
-        radial-gradient(ellipse 50% 40% at 100% 100%, rgba(0, 220, 180, 0.07) 0%, transparent 55%),
-        radial-gradient(ellipse 80% 80% at 50% 50%, rgba(0, 30, 60, 0.8) 0%, transparent 100%);
+        radial-gradient(ellipse 60% 50% at 0% 0%, rgba(0, 180, 220, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 100% 100%, rgba(0, 200, 160, 0.06) 0%, transparent 55%);
     pointer-events: none;
+    transition: background 0.5s ease;
 }
 
-/* Scanline grid overlay */
+@media (prefers-color-scheme: dark) {
+    body::before {
+        background:
+            radial-gradient(ellipse 60% 50% at 0% 0%, rgba(0, 100, 180, 0.12) 0%, transparent 60%),
+            radial-gradient(ellipse 50% 40% at 100% 100%, rgba(0, 220, 180, 0.07) 0%, transparent 55%),
+            radial-gradient(ellipse 80% 80% at 50% 50%, rgba(0, 30, 60, 0.8) 0%, transparent 100%);
+    }
+}
+
+/* Grid overlay */
 body::after {
     content: '';
     position: fixed;
     inset: 0;
     z-index: 0;
     background-image:
-        linear-gradient(rgba(0, 229, 255, 0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 229, 255, 0.025) 1px, transparent 1px);
+        linear-gradient(rgba(0, 100, 160, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 100, 160, 0.05) 1px, transparent 1px);
     background-size: 48px 48px;
     pointer-events: none;
+    animation: gridDrift 30s linear infinite;
 }
 
-/* ── SCANLINE SWEEP ────────────────────────────────────────── */
-.scanline,
-body>nav+div::before {
+@media (prefers-color-scheme: dark) {
+    body::after {
+        background-image:
+            linear-gradient(rgba(0, 229, 255, 0.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 229, 255, 0.025) 1px, transparent 1px);
+    }
+}
+
+@keyframes gridDrift {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: 48px 48px;
+    }
+}
+
+/* ── SCANLINE SWEEP ─────────────────────────────────────────── */
+.scanline {
     position: fixed;
     top: 0;
     left: 0;
@@ -118,20 +178,28 @@ body>nav+div::before {
     }
 }
 
-/* ── NAVBAR ────────────────────────────────────────────────── */
+/* ── NAVBAR ─────────────────────────────────────────────────── */
 .navbar {
     position: sticky !important;
     top: 0;
     z-index: 200;
-    background: rgba(3, 5, 10, 0.95) !important;
+    background: rgba(238, 242, 247, 0.95) !important;
     backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border2) !important;
     height: 58px;
     padding: 0 24px !important;
-    box-shadow: 0 0 30px rgba(0, 229, 255, 0.05), 0 1px 0 rgba(0, 229, 255, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(0, 100, 160, 0.1);
+    transition: background 0.5s ease;
 }
 
-/* Top glow line on navbar */
+@media (prefers-color-scheme: dark) {
+    .navbar {
+        background: rgba(3, 5, 10, 0.95) !important;
+        box-shadow: 0 0 30px rgba(0, 229, 255, 0.05), 0 1px 0 rgba(0, 229, 255, 0.1);
+    }
+}
+
+/* Top glow line */
 .navbar::before {
     content: '';
     position: absolute;
@@ -140,7 +208,32 @@ body>nav+div::before {
     right: 0;
     height: 1px;
     background: linear-gradient(90deg, transparent, var(--cyan), transparent);
-    opacity: 0.6;
+    opacity: 0.5;
+}
+
+/* Data blip animation */
+.navbar::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: -100%;
+    width: 40%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    animation: navBlip 5s ease-in-out infinite;
+    opacity: 0.4;
+}
+
+@keyframes navBlip {
+
+    0%,
+    100% {
+        left: -40%;
+    }
+
+    50% {
+        left: 120%;
+    }
 }
 
 .navbar-brand {
@@ -155,9 +248,27 @@ body>nav+div::before {
     align-items: center;
     gap: 12px;
     text-shadow: 0 0 20px var(--cyan-glow);
+    position: relative;
 }
 
-/* Live status dot */
+/* underline on hover */
+.navbar-brand::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    transform: scaleX(0);
+    transition: transform 0.4s ease;
+}
+
+.navbar-brand:hover::after {
+    transform: scaleX(1);
+}
+
+/* Live dot */
 .navbar-brand::before {
     content: '';
     width: 6px;
@@ -183,7 +294,7 @@ body>nav+div::before {
     }
 }
 
-/* ── NAV BUTTONS ───────────────────────────────────────────── */
+/* ── NAV BUTTONS ────────────────────────────────────────────── */
 .btn-outline-light {
     font-family: var(--mono) !important;
     font-size: 13px !important;
@@ -200,19 +311,25 @@ body>nav+div::before {
 }
 
 .btn-outline-light:hover {
-    background: rgba(0, 229, 255, 0.14) !important;
+    background: rgba(0, 136, 204, 0.14) !important;
     border-color: var(--cyan) !important;
-    color: #fff !important;
+    color: var(--cyan) !important;
     box-shadow: 0 0 16px var(--cyan-glow) !important;
 }
 
-/* ── CONTAINER ─────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+    .btn-outline-light:hover {
+        color: #fff !important;
+    }
+}
+
+/* ── CONTAINER ──────────────────────────────────────────────── */
 .container {
     position: relative;
     z-index: 1;
 }
 
-/* ── MAIN CARD ─────────────────────────────────────────────── */
+/* ── MAIN CARD ──────────────────────────────────────────────── */
 .main-card {
     background: var(--panel);
     border: 1px solid var(--border2);
@@ -221,11 +338,25 @@ body>nav+div::before {
     margin-bottom: 16px;
     position: relative;
     overflow: hidden;
-    box-shadow:
-        0 0 0 1px rgba(0, 229, 255, 0.05) inset,
-        0 8px 40px rgba(0, 0, 0, 0.6),
-        0 0 60px rgba(0, 229, 255, 0.03) !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.9) inset !important;
     animation: panelIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    transition: box-shadow 0.3s ease, border-color 0.3s ease, background 0.5s ease;
+}
+
+@media (prefers-color-scheme: dark) {
+    .main-card {
+        box-shadow:
+            0 0 0 1px rgba(0, 229, 255, 0.05) inset,
+            0 8px 40px rgba(0, 0, 0, 0.6),
+            0 0 60px rgba(0, 229, 255, 0.03) !important;
+    }
+
+    .main-card:hover {
+        box-shadow:
+            0 0 0 1px rgba(0, 229, 255, 0.08) inset,
+            0 12px 60px rgba(0, 0, 0, 0.7),
+            0 0 80px rgba(0, 229, 255, 0.04) !important;
+    }
 }
 
 @keyframes panelIn {
@@ -242,7 +373,6 @@ body>nav+div::before {
     }
 }
 
-/* Stagger */
 .main-card:nth-child(2) {
     animation-delay: .1s;
 }
@@ -251,7 +381,7 @@ body>nav+div::before {
     animation-delay: .2s;
 }
 
-/* Top cyan accent line */
+/* Top accent line */
 .main-card::before {
     content: '';
     position: absolute;
@@ -263,7 +393,7 @@ body>nav+div::before {
     opacity: 0.8;
 }
 
-/* Corner brackets */
+/* Corner bracket — bottom right */
 .main-card::after {
     content: '';
     position: absolute;
@@ -276,7 +406,45 @@ body>nav+div::before {
     opacity: 0.4;
 }
 
-/* ── HUD LABEL (section titles inside card) ─────────────────── */
+/* 4-corner brackets (optional divs) */
+.main-card .corner-tl,
+.main-card .corner-tr,
+.main-card .corner-bl,
+.main-card .corner-br {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-color: var(--cyan-dim);
+    border-style: solid;
+    opacity: .45;
+    pointer-events: none;
+}
+
+.main-card .corner-tl {
+    top: 8px;
+    left: 8px;
+    border-width: 1px 0 0 1px;
+}
+
+.main-card .corner-tr {
+    top: 8px;
+    right: 8px;
+    border-width: 1px 1px 0 0;
+}
+
+.main-card .corner-bl {
+    bottom: 8px;
+    left: 8px;
+    border-width: 0 0 1px 1px;
+}
+
+.main-card .corner-br {
+    bottom: 8px;
+    right: 8px;
+    border-width: 0 1px 1px 0;
+}
+
+/* ── CARD HEADINGS ──────────────────────────────────────────── */
 .main-card h5.fw-bold {
     font-family: var(--title) !important;
     font-size: 14px !important;
@@ -305,7 +473,7 @@ body>nav+div::before {
     background: linear-gradient(90deg, var(--border2), transparent);
 }
 
-/* ── DATE DISPLAY ──────────────────────────────────────────── */
+/* ── DATE ───────────────────────────────────────────────────── */
 #realtime-date {
     font-family: var(--mono) !important;
     font-size: 15px !important;
@@ -315,52 +483,95 @@ body>nav+div::before {
     margin-bottom: 8px !important;
 }
 
-/* ── CLOCK ─────────────────────────────────────────────────── */
+/* ── CLOCK ──────────────────────────────────────────────────── */
 #realtime-clock {
     font-family: var(--title) !important;
     font-size: clamp(38px, 9vw, 68px) !important;
     font-weight: 900 !important;
     letter-spacing: 8px;
     color: var(--cyan) !important;
-    text-shadow:
-        0 0 20px var(--cyan-glow),
-        0 0 60px rgba(0, 229, 255, 0.1);
+    text-shadow: 0 0 20px var(--cyan-glow), 0 0 60px rgba(0, 136, 204, 0.1);
     margin-bottom: 28px !important;
     line-height: 1;
+    animation: glitchIdle 6s steps(1) infinite;
 }
 
-/* ── HR ────────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+    #realtime-clock {
+        text-shadow: 0 0 20px var(--cyan-glow), 0 0 60px rgba(0, 229, 255, 0.1);
+    }
+}
+
+@keyframes glitchIdle {
+
+    0%,
+    94%,
+    100% {
+        clip-path: none;
+        transform: none;
+    }
+
+    95% {
+        text-shadow: -3px 0 var(--danger), 3px 0 var(--green);
+        clip-path: inset(10% 0 80% 0);
+        transform: skewX(-5deg);
+    }
+
+    96% {
+        clip-path: inset(60% 0 20% 0);
+        transform: skewX(3deg);
+    }
+
+    97% {
+        clip-path: none;
+        transform: none;
+    }
+}
+
+/* ── HR ─────────────────────────────────────────────────────── */
 hr {
     border: none !important;
     height: 1px !important;
     background: linear-gradient(90deg, transparent, var(--border2) 30%, var(--border2) 70%, transparent) !important;
     margin: 24px 0 !important;
-    position: relative;
 }
 
-/* ── PROGRESS BAR ──────────────────────────────────────────── */
+/* ── PROGRESS BAR ───────────────────────────────────────────── */
 .progress {
-    height: 28px !important;
+    height: 35px !important;
     border-radius: 0 !important;
-    background: rgba(0, 0, 0, 0.5) !important;
+    background: var(--bg2) !important;
     border: 1px solid var(--border2) !important;
     overflow: hidden;
     position: relative;
-    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8), 0 0 10px rgba(0, 229, 255, 0.05);
+    box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.15);
 }
 
-/* Tick marks on track */
+@media (prefers-color-scheme: dark) {
+    .progress {
+        background: rgba(0, 0, 0, 0.5) !important;
+        box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8), 0 0 10px rgba(0, 229, 255, 0.05);
+    }
+}
+
+/* Tick marks */
 .progress::before {
     content: '';
     position: absolute;
     inset: 0;
     background-image: repeating-linear-gradient(90deg,
-            rgba(0, 229, 255, 0.06) 0px,
-            rgba(0, 229, 255, 0.06) 1px,
-            transparent 1px,
-            transparent 10%);
-    z-index: 1;
+            rgba(0, 100, 160, 0.08) 0px, rgba(0, 100, 160, 0.08) 1px,
+            transparent 1px, transparent 10%);
+    z-index: 2;
     pointer-events: none;
+}
+
+@media (prefers-color-scheme: dark) {
+    .progress::before {
+        background-image: repeating-linear-gradient(90deg,
+                rgba(0, 229, 255, 0.06) 0px, rgba(0, 229, 255, 0.06) 1px,
+                transparent 1px, transparent 10%);
+    }
 }
 
 .progress-bar {
@@ -369,23 +580,49 @@ hr {
     font-size: 13px !important;
     font-weight: 700 !important;
     letter-spacing: 3px;
-    color: #000 !important;
+    color: #fff !important;
     transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1), background 0.6s !important;
     position: relative;
+    overflow: hidden;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
 }
 
-/* Moving energy sweep */
+/* ── WAVE ANIMATION ─────────────────────────────────────────── */
+.progress-bar::before {
+    content: '';
+    position: absolute;
+    top: -150%;
+    left: 50%;
+    width: 300%;
+    height: 500%;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 40%;
+    animation: waveRotate 6s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes waveRotate {
+    from {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* Energy sweep on top of wave */
 .progress-bar::after {
     content: '';
     position: absolute;
     top: 0;
     bottom: 0;
     width: 40px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    animation: sweep 2s linear infinite;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+    animation: sweep 2.5s linear infinite;
+    pointer-events: none;
 }
 
 @keyframes sweep {
@@ -399,21 +636,24 @@ hr {
 }
 
 .progress-bar.bg-success {
-    background: linear-gradient(90deg, #006644, var(--green)) !important;
-    box-shadow: 0 0 20px var(--green-glow), inset 0 0 10px rgba(0, 255, 136, 0.2);
-    color: #001a0d !important;
+    background: linear-gradient(90deg, var(--green-dim), var(--green)) !important;
+    box-shadow: 0 0 20px var(--green-glow);
+    color: #fff !important;
+    text-shadow: 0 0 8px rgba(0, 255, 136, 0.6);
 }
 
 .progress-bar.bg-warning {
-    background: linear-gradient(90deg, #885500, var(--warn)) !important;
-    box-shadow: 0 0 20px var(--warn-glow), inset 0 0 10px rgba(255, 170, 0, 0.2);
-    color: #1a0d00 !important;
+    background: linear-gradient(90deg, #8a5000, var(--warn)) !important;
+    box-shadow: 0 0 20px var(--warn-glow);
+    color: #fff !important;
+    text-shadow: 0 0 8px rgba(255, 170, 0, 0.6);
 }
 
 .progress-bar.bg-danger {
-    background: linear-gradient(90deg, #880022, var(--danger)) !important;
-    box-shadow: 0 0 20px var(--danger-glow), inset 0 0 10px rgba(255, 34, 85, 0.2);
-    color: #1a0008 !important;
+    background: linear-gradient(90deg, #8a0020, var(--danger)) !important;
+    box-shadow: 0 0 20px var(--danger-glow);
+    color: #fff !important;
+    text-shadow: 0 0 8px rgba(255, 34, 85, 0.6);
     animation: dangerFlash 1s ease-in-out infinite;
 }
 
@@ -429,7 +669,7 @@ hr {
     }
 }
 
-/* ── STAT SECTION (sensor row) ─────────────────────────────── */
+/* ── STAT SECTION ───────────────────────────────────────────── */
 .main-card .border-top {
     border-top: 1px solid var(--border2) !important;
     padding-top: 20px !important;
@@ -446,7 +686,7 @@ hr {
     display: block;
 }
 
-/* ── BADGE ─────────────────────────────────────────────────── */
+/* ── BADGE ──────────────────────────────────────────────────── */
 .badge {
     font-family: var(--mono) !important;
     font-size: 12px !important;
@@ -457,6 +697,19 @@ hr {
     padding: 6px 14px !important;
     clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
     transition: all 0.3s;
+    animation: badgeIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes badgeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.7);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .badge.bg-secondary {
@@ -471,9 +724,8 @@ hr {
     background: var(--warn) !important;
     color: #000 !important;
     font-weight: 700 !important;
-    font-size: 12px !important;
     border: none;
-    box-shadow: 0 0 16px var(--warn-glow), 0 0 4px rgba(255, 170, 0, 0.5) inset;
+    box-shadow: 0 0 16px var(--warn-glow);
     animation: warnBlink 1.5s ease-in-out infinite;
 }
 
@@ -485,16 +737,15 @@ hr {
     }
 
     50% {
-        box-shadow: 0 0 24px var(--warn-glow), 0 0 48px rgba(255, 170, 0, 0.2);
+        box-shadow: 0 0 24px var(--warn-glow);
         transform: scale(1.05);
     }
 }
 
-/* ── TABLE ─────────────────────────────────────────────────── */
+/* ── TABLE ──────────────────────────────────────────────────── */
 .table-responsive {
     border: 1px solid var(--border2);
     overflow: hidden;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), 0 0 1px rgba(0, 229, 255, 0.1) inset;
 }
 
 .table {
@@ -507,7 +758,7 @@ hr {
 .table> :not(caption)>*>* {
     background: transparent !important;
     color: var(--text) !important;
-    border-color: rgba(14, 42, 61, 0.8) !important;
+    border-color: var(--border) !important;
     padding: 14px 20px !important;
     font-size: 14px;
 }
@@ -517,7 +768,7 @@ hr {
 }
 
 .table-hover>tbody>tr:hover>* {
-    background: rgba(0, 229, 255, 0.04) !important;
+    background: rgba(0, 136, 204, 0.04) !important;
 }
 
 .table-hover>tbody>tr:hover>td:first-child {
@@ -559,6 +810,63 @@ hr {
     text-shadow: 0 0 12px var(--cyan-glow);
 }
 
+/* Table row slide-in */
+#history-table tr {
+    animation: rowSlide 0.4s ease both;
+}
+
+#history-table tr:nth-child(1) {
+    animation-delay: .02s
+}
+
+#history-table tr:nth-child(2) {
+    animation-delay: .04s
+}
+
+#history-table tr:nth-child(3) {
+    animation-delay: .06s
+}
+
+#history-table tr:nth-child(4) {
+    animation-delay: .08s
+}
+
+#history-table tr:nth-child(5) {
+    animation-delay: .10s
+}
+
+#history-table tr:nth-child(6) {
+    animation-delay: .12s
+}
+
+#history-table tr:nth-child(7) {
+    animation-delay: .14s
+}
+
+#history-table tr:nth-child(8) {
+    animation-delay: .16s
+}
+
+#history-table tr:nth-child(9) {
+    animation-delay: .18s
+}
+
+#history-table tr:nth-child(10) {
+    animation-delay: .20s
+}
+
+@keyframes rowSlide {
+    from {
+        opacity: 0;
+        transform: translateX(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
 .table-light,
 .table-light>* {
     background: var(--panel2) !important;
@@ -566,7 +874,7 @@ hr {
     border-color: var(--border2) !important;
 }
 
-/* ── FORM INPUT ────────────────────────────────────────────── */
+/* ── FORM INPUT ─────────────────────────────────────────────── */
 .form-control,
 input[type="date"] {
     background: var(--panel2) !important;
@@ -576,11 +884,11 @@ input[type="date"] {
     font-family: var(--mono) !important;
     font-size: 14px !important;
     padding: 11px 16px !important;
-    color-scheme: dark;
+    color-scheme: light dark;
     outline: none;
     box-shadow: none !important;
     letter-spacing: 1px;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.5s;
 }
 
 .form-control:focus,
@@ -589,7 +897,7 @@ input[type="date"]:focus {
     box-shadow: 0 0 0 2px var(--cyan-soft), 0 0 16px var(--cyan-glow) !important;
 }
 
-/* ── ALERT (analysis box) ──────────────────────────────────── */
+/* ── ALERT ──────────────────────────────────────────────────── */
 .alert {
     border-radius: 0 !important;
     font-family: var(--mono) !important;
@@ -609,7 +917,30 @@ input[type="date"]:focus {
     letter-spacing: 1px;
 }
 
-/* ── TEXT UTILITIES ────────────────────────────────────────── */
+/* Typing cursor */
+#analysis-text::after {
+    content: '█';
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--cyan);
+    opacity: 0.7;
+    animation: blink 1s step-end infinite;
+    margin-left: 6px;
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 0.7;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+/* ── TEXT UTILITIES ─────────────────────────────────────────── */
 .text-primary {
     color: var(--cyan) !important;
 }
@@ -639,12 +970,12 @@ small {
     font-family: var(--mono) !important;
 }
 
-/* ── CHART ─────────────────────────────────────────────────── */
+/* ── CHART ──────────────────────────────────────────────────── */
 canvas#myChart {
     filter: drop-shadow(0 0 6px var(--cyan-glow));
 }
 
-/* ── SCROLLBAR ─────────────────────────────────────────────── */
+/* ── SCROLLBAR ──────────────────────────────────────────────── */
 ::-webkit-scrollbar {
     width: 4px;
     height: 4px;
@@ -667,9 +998,7 @@ canvas#myChart {
     color: var(--cyan);
 }
 
-/* ── CONTROL PAGE ──────────────────────────────────────────── */
-
-/* Header bar */
+/* ── CONTROL PAGE ───────────────────────────────────────────── */
 .ctrl-header {
     display: flex;
     align-items: center;
@@ -679,6 +1008,7 @@ canvas#myChart {
     background: var(--panel2);
     position: relative;
     overflow: hidden;
+    transition: background 0.5s;
 }
 
 .ctrl-header::before {
@@ -718,25 +1048,39 @@ canvas#myChart {
 
 .ctrl-dot.danger {
     background: var(--danger);
-    box-shadow: 0 0 8px var(--danger-glow);
-    animation: dangerDot 1s ease-in-out infinite;
+    animation: dangerRing 1.5s ease-out infinite;
 }
 
-@keyframes dangerDot {
+@keyframes dangerRing {
+    0% {
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.6);
+    }
 
-    0%,
+    70% {
+        box-shadow: 0 0 0 8px rgba(220, 38, 38, 0);
+    }
+
     100% {
-        opacity: 1;
-        box-shadow: 0 0 6px var(--danger-glow);
-    }
-
-    50% {
-        opacity: 0.4;
-        box-shadow: 0 0 14px var(--danger-glow);
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
     }
 }
 
-/* Card accent borders */
+@media (prefers-color-scheme: dark) {
+    @keyframes dangerRing {
+        0% {
+            box-shadow: 0 0 0 0 rgba(255, 34, 85, 0.6);
+        }
+
+        70% {
+            box-shadow: 0 0 0 8px rgba(255, 34, 85, 0);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(255, 34, 85, 0);
+        }
+    }
+}
+
 .ctrl-card-lid {
     border-left: 2px solid var(--cyan) !important;
 }
@@ -745,7 +1089,6 @@ canvas#myChart {
     border-left: 2px solid var(--warn) !important;
 }
 
-/* Section label */
 .ctrl-section-label {
     font-family: var(--title);
     font-size: 13px;
@@ -776,7 +1119,6 @@ canvas#myChart {
     margin-bottom: 20px !important;
 }
 
-/* Control buttons */
 .ctrl-btn {
     background: transparent;
     border: 1px solid var(--border2);
@@ -786,7 +1128,7 @@ canvas#myChart {
     flex-direction: column;
     align-items: center;
     gap: 6px;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1) !important;
     position: relative;
     overflow: hidden;
 }
@@ -804,7 +1146,8 @@ canvas#myChart {
 }
 
 .ctrl-btn:active {
-    transform: scale(0.97);
+    transform: scale(0.95) !important;
+    filter: brightness(1.2);
 }
 
 .ctrl-btn-icon {
@@ -826,7 +1169,6 @@ canvas#myChart {
     opacity: 0.7;
 }
 
-/* Open lid — cyan */
 .ctrl-btn-open {
     border-color: var(--cyan-dim) !important;
     color: var(--cyan);
@@ -841,9 +1183,8 @@ canvas#myChart {
     box-shadow: 0 0 20px var(--cyan-glow), inset 0 0 20px var(--cyan-soft);
 }
 
-/* Close lid — danger */
 .ctrl-btn-close {
-    border-color: rgba(255, 34, 85, 0.35) !important;
+    border-color: var(--danger-soft) !important;
     color: var(--danger);
 }
 
@@ -856,9 +1197,8 @@ canvas#myChart {
     box-shadow: 0 0 20px var(--danger-glow), inset 0 0 20px var(--danger-soft);
 }
 
-/* Buzzer ON — warn */
 .ctrl-btn-buzz-on {
-    border-color: rgba(255, 170, 0, 0.35) !important;
+    border-color: var(--warn-soft) !important;
     color: var(--warn);
 }
 
@@ -871,14 +1211,13 @@ canvas#myChart {
     box-shadow: 0 0 20px var(--warn-glow), inset 0 0 20px var(--warn-soft);
 }
 
-/* Buzzer OFF — muted */
 .ctrl-btn-buzz-off {
     border-color: var(--border2) !important;
     color: var(--text2);
 }
 
 .ctrl-btn-buzz-off::before {
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(0, 0, 0, 0.03);
 }
 
 .ctrl-btn-buzz-off:hover {
@@ -886,7 +1225,6 @@ canvas#myChart {
     color: var(--text);
 }
 
-/* Lid status row */
 .ctrl-status-row {
     display: flex;
     align-items: center;
@@ -895,6 +1233,7 @@ canvas#myChart {
     background: var(--panel2);
     border: 1px solid var(--border2);
     border-left: 2px solid var(--cyan);
+    transition: background 0.5s;
 }
 
 .ctrl-status-label {
@@ -913,7 +1252,6 @@ canvas#myChart {
     transition: color 0.3s, text-shadow 0.3s;
 }
 
-/* JS will add these classes */
 #lid-status.text-success {
     color: var(--green) !important;
     text-shadow: 0 0 12px var(--green-glow);
@@ -924,11 +1262,11 @@ canvas#myChart {
     text-shadow: 0 0 12px var(--danger-glow);
 }
 
-/* Volume slider section */
 .ctrl-vol-wrap {
     background: var(--panel2);
     border: 1px solid var(--border2);
     padding: 20px;
+    transition: background 0.5s;
 }
 
 .ctrl-vol-header {
@@ -952,6 +1290,7 @@ canvas#myChart {
     color: var(--warn);
     text-shadow: 0 0 16px var(--warn-glow);
     line-height: 1;
+    transition: text-shadow 0.2s;
 }
 
 .ctrl-vol-val sup {
@@ -1011,7 +1350,19 @@ canvas#myChart {
     margin-top: 8px;
 }
 
-/* ── RESPONSIVE ────────────────────────────────────────────── */
+/* ── CURSOR ─────────────────────────────────────────────────── */
+body {
+    cursor: default;
+}
+
+button,
+a,
+input,
+.ctrl-btn {
+    cursor: pointer;
+}
+
+/* ── RESPONSIVE ─────────────────────────────────────────────── */
 @media (max-width: 576px) {
     .main-card {
         padding: 20px;
