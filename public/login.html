@@ -11,74 +11,73 @@
 
 <body>
     <div class="scanline"></div>
-
     <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-        <div class="main-card" style="width: 100%; max-width: 400px; padding: 40px;">
-
+        <form id="loginForm" class="main-card" style="width: 100%; max-width: 400px; padding: 40px;">
             <h5 class="fw-bold mb-4 text-center"
                 style="color: var(--cyan); text-shadow: 0 0 15px var(--cyan-glow); font-size: 20px;">
                 SYSTEM AUTHORIZATION
             </h5>
             <hr>
-
             <div class="mb-4 mt-4">
                 <label class="form-label text-muted small" style="letter-spacing: 2px;">USERNAME</label>
-                <input type="text" id="username" class="form-control text-center" placeholder="ป้อนชื่อผู้ใช้"
-                    style="font-size: 16px;">
+                <input type="text" id="username" class="form-control text-center" placeholder="ป้อนชื่อผู้ใช้" required>
             </div>
-
             <div class="mb-4">
                 <label class="form-label text-muted small" style="letter-spacing: 2px;">PASSWORD</label>
                 <input type="password" id="password" class="form-control text-center" placeholder="ป้อนรหัสผ่าน"
-                    style="font-size: 16px;">
+                    required>
             </div>
-
-            <button class="btn btn-outline-light w-100 py-3 mt-2"
-                style="border-color: var(--cyan); color: var(--cyan); font-size: 14px;" onclick="login()">
+            <button type="submit" class="btn btn-outline-light w-100 py-3 mt-2"
+                style="border-color: var(--cyan); color: var(--cyan); font-size: 14px;">
                 [ ยืนยันตัวตน ]
             </button>
-
-            <div id="error-msg" class="text-danger mt-3 text-center"
-                style="display: none; text-shadow: 0 0 10px var(--danger-glow); font-family: var(--mono); font-size: 12px;">
-            </div>
-
+            <div id="status-msg" class="mt-3 text-center"
+                style="display: none; font-family: var(--mono); font-size: 13px;"></div>
             <div class="mt-4 text-center">
                 <a href="/" class="text-muted small text-decoration-none" style="font-family: var(--mono);">&lt;&lt;
                     กลับหน้าหลัก</a>
             </div>
-
-        </div>
+        </form>
     </div>
 
     <script>
-        async function login() {
-            const u = document.getElementById('username').value;
-            const p = document.getElementById('password').value;
+        const urlParams = new URLSearchParams(window.location.search);
+        let redirectUrl = urlParams.get('redirect') || '/home.html';
+        if (redirectUrl.includes('login.html')) redirectUrl = '/home.html';
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const statusMsg = document.getElementById('status-msg');
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
 
             try {
-                const res = await fetch('/api/login', {
+                const response = await fetch('/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: u, password: p })
+                    body: JSON.stringify({ username, password })
                 });
-                const data = await res.json();
+                const result = await response.json();
 
-                if (data.success) {
-                    // ถ้าล็อคอินผ่าน ให้พาไปหน้า Control ทันที
-                    window.location.href = '/control.html';
+                if (result.success) {
+                    // 🟢 แก้ไข: แสดงข้อความแทน Alert และหน่วงเวลา
+                    statusMsg.style.display = 'block';
+                    statusMsg.style.color = 'var(--cyan)';
+                    statusMsg.innerText = '🔓 ยืนยันตัวตนสำเร็จ กำลังเข้าสู่ระบบ...';
+
+                    setTimeout(() => {
+                        window.location.href = redirectUrl;
+                    }, 1200);
                 } else {
-                    const err = document.getElementById('error-msg');
-                    err.innerText = data.message;
-                    err.style.display = 'block';
+                    statusMsg.style.display = 'block';
+                    statusMsg.style.color = '#ff4d4d';
+                    statusMsg.innerText = '❌ รหัสผ่านไม่ถูกต้อง';
                 }
-            } catch (e) {
-                console.log("Login Error", e);
+            } catch (error) {
+                statusMsg.style.display = 'block';
+                statusMsg.style.color = '#ff4d4d';
+                statusMsg.innerText = '⚠️ ระบบขัดข้อง กรุณาลองใหม่';
             }
-        }
-
-        // อนุญาตให้กด Enter เพื่อ Login ได้เลย
-        document.getElementById('password').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') login();
         });
     </script>
 </body>
