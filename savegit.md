@@ -4,7 +4,7 @@
 
     git add . (Git จะข้ามไฟล์ที่เราสั่งไว้ใน .gitignore เองอัตโนมัติ)
 
-    git commit -m "update .gitignore and code"
+    git commit -m "update"
 
     git push
 
