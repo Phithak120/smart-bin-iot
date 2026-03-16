@@ -1,3 +1,8 @@
+const express = require('express'); // 🟢 ต้องมีบรรทัดนี้
+const router = express.Router();    // 🟢 และบรรทัดนี้ เพื่อสร้างตัวแปร router
+require('dotenv').config();
+
+// ... โค้ดเดิมของคุณที่เริ่มด้วย router.post('/login', ... ...
 router.post('/login', (req, res) => {
     const { username, password } = req.body;
     // 🟢 ตรวจสอบค่าจาก Environment Variables
@@ -8,3 +13,4 @@ router.post('/login', (req, res) => {
     }
     res.status(401).json({ success: false, message: 'Invalid credentials' });
 });
+module.exports = router; // 🟢 เพื่อส่งออกไปให้ไฟล์ server.js ใช้งาน
