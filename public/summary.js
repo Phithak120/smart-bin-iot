@@ -42,11 +42,14 @@ function switchTab(tab) {
         b.setAttribute('aria-selected', 'false');
     });
 
-    document.getElementById('pane-' + tab).classList.add('active');
+    const pane = document.getElementById('pane-' + tab);
+    if (pane) pane.classList.add('active');
 
     const btn = document.getElementById('tab-' + tab + '-btn');
-    btn.classList.add('active');
-    btn.setAttribute('aria-selected', 'true');
+    if (btn) {
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+    }
 
     // Lazy render charts on first visit
     if (tab === 'trash') {
@@ -77,7 +80,6 @@ async function renderTrashChart() {
             }
         });
 
-        // ── Empty state ──
         const wrap = document.querySelector('#pane-trash .chart-wrap');
         const existingEmpty = wrap.querySelector('.chart-empty');
         if (existingEmpty) existingEmpty.remove();
@@ -91,28 +93,19 @@ async function renderTrashChart() {
             return;
         }
 
-        // ── Stats ──
         const sum    = points.reduce((a, b) => a + b, 0);
         const avg    = sum / points.length;
         const latest = points[points.length - 1];
         const trend  = latest > avg ? '📈 แนวโน้มเพิ่มขึ้น' : '📊 ค่อนข้างคงที่';
 
         updateStatCards({ avg: avg.toFixed(1) + '%', latest: latest + '%', trend }, 'trash');
-
         updateAnalysisBox('analysis-text',
-            `<div>
-                เฉลี่ย: <strong>${avg.toFixed(1)}%</strong>
-                <span class="mx-3 text-muted">|</span>
-                ล่าสุด: <strong>${latest}%</strong>
-                <div class="mt-1 text-muted" style="font-size:12px;">สถานะ: ${trend}</div>
-             </div>`);
+            `<div>เฉลี่ย: <strong>${avg.toFixed(1)}%</strong> <span class="mx-3 text-muted">|</span> ล่าสุด: <strong>${latest}%</strong></div>`);
 
-        // ── Draw chart ──
         const ctx = document.getElementById('trashChart').getContext('2d');
         if (trashChartInst) trashChartInst.destroy();
 
         const cyan = cssVar('--cyan') || '#0088cc';
-
         trashChartInst = new Chart(ctx, {
             type: 'line',
             data: {
@@ -121,192 +114,84 @@ async function renderTrashChart() {
                     label: 'ระดับขยะ (%)',
                     data: points,
                     borderColor: cyan,
-                    pointBackgroundColor: cssVar('--bg') || '#eef2f7',
-                    pointBorderColor: cyan,
-                    pointHoverBackgroundColor: cyan,
-                    pointBorderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 7,
                     tension: 0.4,
                     fill: true,
-                    backgroundColor: (context) => {
-                        const { chart } = context;
-                        const { ctx: c, chartArea } = chart;
-                        if (!chartArea) return null;
-                        const g = c.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-                        g.addColorStop(0, 'rgba(0,136,204,0)');
-                        g.addColorStop(1, 'rgba(0,136,204,0.2)');
-                        return g;
-                    }
+                    backgroundColor: 'rgba(0,136,204,0.1)'
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                animation: { duration: 500 },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: 'rgba(8,14,24,0.85)',
-                        borderColor: cyan,
-                        borderWidth: 1,
-                        titleFont: { family: "'Orbitron', sans-serif", size: 11 },
-                        bodyFont: { family: "'Share Tech Mono', monospace" },
-                        callbacks: {
-                            label: ctx => ` ${ctx.parsed.y}%`
-                        }
-                    }
-                },
-                scales: {
-                    y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } },
-                    x: { ticks: { maxTicksLimit: 10, maxRotation: 0 } }
-                }
+                scales: { y: { beginAtZero: true, max: 100 } }
             }
         });
 
         if (spinner) spinner.style.display = 'none';
-
     } catch (err) {
         console.error('Trash chart error:', err);
-        updateAnalysisBox('analysis-text', '<span class="text-danger">⚠ ดึงข้อมูลล้มเหลว</span>');
         if (spinner) spinner.style.display = 'none';
     }
 }
 
 /* ============================================================
-   CHART 2: LID OPEN FREQUENCY (bar — 24 hours)
+   CHART 2: LID OPEN FREQUENCY (bar)
    ============================================================ */
 async function renderLidChart() {
     const spinner = document.getElementById('lid-spinner');
     try {
         const res    = await fetch('/api/lid-history');
-        const counts = await res.json(); // 24-element array
+        const counts = await res.json();
 
         const totalOpens = counts.reduce((a, b) => a + b, 0);
         const peakHour   = counts.indexOf(Math.max(...counts));
 
-        // ── Empty state ──
         const wrap = document.querySelector('#pane-lid .chart-wrap');
         const existingEmpty = wrap.querySelector('.chart-empty');
         if (existingEmpty) existingEmpty.remove();
 
         if (totalOpens === 0) {
-            wrap.insertAdjacentHTML('beforeend',
-                `<div class="chart-empty"><span class="chart-empty-icon">🔒</span>ยังไม่มีข้อมูลการเปิดฝา</div>`);
+            wrap.insertAdjacentHTML('beforeend', `<div class="chart-empty">ยังไม่มีข้อมูลการเปิดฝา</div>`);
             if (spinner) spinner.style.display = 'none';
-            updateAnalysisBox('lid-analysis-text', '<span class="text-muted">— ยังไม่มีการบันทึกการเปิดฝา —</span>');
-            updateStatCards({ total: '0 ครั้ง', peak: '—', lidStatus: 'ไม่มีข้อมูล' }, 'lid');
             return;
         }
 
-        // ── Stats ──
-        const peakLabel = peakHour + ':00 – ' + (peakHour + 1) + ':00 น.';
-        updateStatCards({ total: totalOpens + ' ครั้ง', peak: peakLabel, lidStatus: '📋 มีข้อมูลแล้ว' }, 'lid');
+        updateStatCards({ total: totalOpens + ' ครั้ง', peak: peakHour + ':00 น.', lidStatus: 'ปกติ' }, 'lid');
 
-        updateAnalysisBox('lid-analysis-text',
-            `<div>
-                เปิดฝาทั้งหมด: <strong>${totalOpens} ครั้ง</strong>
-                <span class="mx-3 text-muted">|</span>
-                ชั่วโมงที่บ่อยที่สุด: <strong>${peakLabel}</strong>
-                <div class="mt-1 text-muted" style="font-size:12px;">${peakHour >= 6 && peakHour < 12 ? '🌅 ช่วงเช้า' : peakHour >= 12 && peakHour < 18 ? '☀️ ช่วงบ่าย' : peakHour >= 18 ? '🌙 ช่วงเย็น/คืน' : '🌃 ช่วงดึก'}</div>
-             </div>`);
-
-        // ── Draw chart ──
         const ctx = document.getElementById('lidChart').getContext('2d');
         if (lidChartInst) lidChartInst.destroy();
-
-        const cyan = cssVar('--cyan') || '#0088cc';
-        const warn = cssVar('--warn') || '#d97706';
-        const cyanGlow = cssVar('--cyan-glow') || 'rgba(0,136,204,0.2)';
-
-        const barColors = counts.map((_, i) => i === peakHour ? warn : cyan);
-        const barGlows  = counts.map((_, i) => i === peakHour
-            ? (cssVar('--warn-glow') || 'rgba(217,119,6,0.25)')
-            : cyanGlow
-        );
-
-        const hourLabels = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0') + ':00');
 
         lidChartInst = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: hourLabels,
-                datasets: [{
-                    label: 'ครั้งที่เปิดฝา',
-                    data: counts,
-                    backgroundColor: barColors.map((c, i) => {
-                        const r = ctx.createLinearGradient(0, 0, 0, 300);
-                        r.addColorStop(0, barColors[i]);
-                        r.addColorStop(1, barGlows[i]);
-                        return r;
-                    }),
-                    borderColor: barColors,
-                    borderWidth: 1,
-                    borderRadius: 2,
-                    borderSkipped: false,
-                }]
+                labels: Array.from({ length: 24 }, (_, i) => i + ':00'),
+                datasets: [{ label: 'ครั้งที่เปิด', data: counts, backgroundColor: '#0088cc' }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: { duration: 600 },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: 'rgba(8,14,24,0.85)',
-                        borderColor: cyan,
-                        borderWidth: 1,
-                        titleFont: { family: "'Orbitron', sans-serif", size: 11 },
-                        bodyFont: { family: "'Share Tech Mono', monospace" },
-                        callbacks: {
-                            label: ctx => ` ${ctx.parsed.y} ครั้ง`
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: { stepSize: 1, callback: v => Math.floor(v) === v ? v : '' }
-                    },
-                    x: {
-                        ticks: {
-                            maxTicksLimit: 12,
-                            maxRotation: 45,
-                            font: { size: 10 }
-                        }
-                    }
-                }
-            }
+            options: { responsive: true, maintainAspectRatio: false }
         });
 
         if (spinner) spinner.style.display = 'none';
-
     } catch (err) {
-        console.error('Lid chart error:', err);
-        updateAnalysisBox('lid-analysis-text', '<span class="text-danger">⚠ ดึงข้อมูลล้มเหลว</span>');
         if (spinner) spinner.style.display = 'none';
     }
 }
 
 /* ============================================================
-   HELPERS
+   HELPERS & AUTH
    ============================================================ */
 function updateAnalysisBox(id, html) {
     const box = document.getElementById(id);
-    if (!box) return;
-    box.innerHTML = html;
-    box.className = 'alert mt-3';
+    if (box) box.innerHTML = html;
 }
 
 function updateStatCards(vals, tab) {
     if (tab === 'trash') {
-        setTextSafe('stat-avg',    vals.avg    ?? '—');
-        setTextSafe('stat-latest', vals.latest ?? '—');
-        setTextSafe('stat-trend',  vals.trend  ?? '—');
+        setTextSafe('stat-avg', vals.avg);
+        setTextSafe('stat-latest', vals.latest);
+        setTextSafe('stat-trend', vals.trend);
     } else {
-        setTextSafe('stat-lid-total',  vals.total     ?? '—');
-        setTextSafe('stat-lid-peak',   vals.peak      ?? '—');
-        setTextSafe('stat-lid-status', vals.lidStatus ?? '—');
+        setTextSafe('stat-lid-total', vals.total);
+        setTextSafe('stat-lid-peak', vals.peak);
+        setTextSafe('stat-lid-status', vals.lidStatus);
     }
 }
 
@@ -315,22 +200,31 @@ function setTextSafe(id, text) {
     if (el) el.textContent = text;
 }
 
-/* ============================================================
-   INIT + AUTO-REFRESH
-   ============================================================ */
 function startRefresh() {
-    clearInterval(trashInterval);
-    clearInterval(lidInterval);
-
-    trashInterval = setInterval(() => {
-        if (activeTab === 'trash') renderTrashChart();
-    }, 5000);
-
-    lidInterval = setInterval(() => {
-        if (activeTab === 'lid') renderLidChart();
-    }, 5000);
+    setInterval(() => { if (activeTab === 'trash') renderTrashChart(); }, 5000);
+    setInterval(() => { if (activeTab === 'lid') renderLidChart(); }, 5000);
 }
 
-// Boot
-renderTrashChart();
-startRefresh();
+// 🟢 ส่วนจัดการ Auth บน Navbar และ Init
+document.addEventListener('DOMContentLoaded', async () => {
+    renderTrashChart();
+    startRefresh();
+
+    const authBtn = document.getElementById('auth-btn');
+    if (!authBtn) return;
+
+    try {
+        const res = await fetch('/api/check-auth');
+        const data = await res.json();
+        if (data.isLoggedIn) {
+            authBtn.textContent = 'ออกจากระบบ';
+            authBtn.className = 'btn-nav btn-danger';
+            authBtn.href = '/api/logout';
+        } else {
+            authBtn.textContent = 'เข้าสู่ระบบ';
+            authBtn.className = 'btn-nav btn-accent';
+            authBtn.href = '/login.html';
+        }
+        authBtn.style.display = 'inline-flex';
+    } catch (e) { console.error(e); }
+});

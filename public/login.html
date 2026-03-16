@@ -42,8 +42,8 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        let redirectUrl = urlParams.get('redirect') || '/home.html';
-        if (redirectUrl.includes('login.html')) redirectUrl = '/home.html';
+        let redirectUrl = urlParams.get('redirect') || '/';
+        if (redirectUrl.includes('login.html')) redirectUrl = '/';
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();

@@ -1,25 +1,34 @@
+// รายชื่อหน้าที่ต้องล็อกอินก่อนถึงจะเข้าได้
+const PROTECTED_PAGES = ['/control.html', '/history.html', '/summary.html'];
+
+// รายชื่อ API ที่เปิดให้ทุกคนเข้าถึงได้
+const PUBLIC_API_PATHS = [
+    '/api/login',
+    '/api/logout',
+    '/api/check-auth',
+    '/api/latest',
+];
+
 module.exports = (req, res, next) => {
-    const publicPaths = [
-        '/login.html',
-        '/style.css',
-        '/api/login',
-        '/api/logout',
-        '/api/check-auth'
-    ];
+    const path = req.path;
+    // 🟢 แก้ไข: ตรวจสอบคุกกี้ชื่อ 'isLoggedIn' ให้ตรงกับใน api.js
+    const isUserLoggedIn = req.cookies && req.cookies.isLoggedIn === 'true';
 
-    if (publicPaths.includes(req.path)) {
+    // 1. ปกป้องหน้า HTML
+    if (PROTECTED_PAGES.includes(path)) {
+        if (!isUserLoggedIn) {
+            return res.redirect(`/login.html?redirect=${encodeURIComponent(path)}`);
+        }
         return next();
     }
 
-    if (req.cookies && req.cookies.isLoggedIn === 'true') {
-        return next();
+    // 2. ปกป้อง API routes ทั้งหมด ยกเว้น whitelist
+    if (path.startsWith('/api/')) {
+        const isPublic = PUBLIC_API_PATHS.some(p => path === p || path.startsWith(p + '?'));
+        if (!isPublic && !isUserLoggedIn) {
+            return res.status(401).json({ error: 'Unauthorized', message: 'กรุณาเข้าสู่ระบบก่อน' });
+        }
     }
 
-    if (req.path.startsWith('/api/')) {
-        return res.status(401).json({ success: false, message: 'Unauthorized' });
-    }
-
-    // ✅ ป้องกัน Browser Cache เพื่อแก้ปัญหา Login Loop
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.redirect('/login.html');
+    next();
 };

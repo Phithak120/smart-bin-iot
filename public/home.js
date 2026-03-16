@@ -1,39 +1,32 @@
-// ฟังก์ชันดึงข้อมูลเซนเซอร์แบบ Real-time
 async function fetchSensorData() {
     try {
         const res = await fetch('/api/latest');
         const data = await res.json();
         
-        // 1. อัปเดต Progress Bar ระดับขยะ
+        console.log("📡 ข้อมูลที่รับมาที่หน้าเว็บ:", data);
+
         const bar = document.getElementById('trash-bar');
-        if (bar) {
-            const p = data.percentage || 0;
+        // ตรวจสอบว่ามีข้อมูล percentage ส่งมาจริงไหม
+        if (bar && data && typeof data.percentage !== 'undefined') {
+            const p = data.percentage;
+            
+            // อัปเดตความกว้างและตัวเลข
             bar.style.width = p + '%';
             bar.innerText = p + '%';
             
-            // เปลี่ยนสีตามความจุ
-            if (p >= 90) bar.className = "progress-bar progress-bar-striped progress-bar-animated bg-danger";
-            else if (p >= 50) bar.className = "progress-bar progress-bar-striped progress-bar-animated bg-warning text-dark";
-            else bar.className = "progress-bar progress-bar-striped progress-bar-animated bg-success";
+            // ปรับสีตามความจุ (อ้างอิงตาม Bootstrap Class)
+            bar.classList.remove('bg-success', 'bg-warning', 'bg-danger');
+            if (p >= 90) bar.classList.add('bg-danger');
+            else if (p >= 50) bar.classList.add('bg-warning');
+            else bar.classList.add('bg-success');
         }
-        
-        // 2. อัปเดตสถานะคน (Proximity)
-        const prox = document.getElementById('proximity-status');
-        if (prox) {
-            prox.innerText = data.is_near ? 'พบคนใกล้ถัง' : 'ปกติ';
-            prox.className = data.is_near ? 'badge bg-warning text-dark p-2' : 'badge bg-secondary p-2';
-        }
-    } catch (err) { 
-        console.error("Update Error:", err); 
+    } catch (err) {
+        console.error("❌ ดึงข้อมูลเซนเซอร์ล้มเหลว:", err);
     }
 }
 
-// เริ่มต้นดึงข้อมูลและตั้งรอบอัปเดตทุก 3 วินาที
-fetchSensorData();
-setInterval(fetchSensorData, 3000);
-
-// ระบบนาฬิกา Real-time
-setInterval(() => {
+// ระบบนาฬิกา
+function updateClock() {
     const clockEl = document.getElementById('realtime-clock');
     const dateEl = document.getElementById('realtime-date');
     if (!clockEl || !dateEl) return;
@@ -43,31 +36,36 @@ setInterval(() => {
     dateEl.innerText = now.toLocaleDateString('th-TH', { 
         weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
     });
-}, 1000);
+}
 
-// จัดการสถานะ Navbar (เข้าสู่ระบบ / ออกจากระบบ)
 document.addEventListener('DOMContentLoaded', async () => {
+    // 1. เริ่มดึงข้อมูลทันทีที่โหลดหน้าจอ
+    fetchSensorData();
+    updateClock();
+
+    // 2. ตั้งเวลาอัปเดตต่อเนื่อง
+    setInterval(fetchSensorData, 3000);
+    setInterval(updateClock, 1000);
+
+    // 3. จัดการปุ่ม Login/Logout
     const authBtn = document.getElementById('auth-btn');
-    if (!authBtn) return;
+    if (authBtn) {
+        try {
+            const res = await fetch('/api/check-auth');
+            const data = await res.json();
 
-    try {
-        const res = await fetch('/api/check-auth');
-        const data = await res.json();
-
-        if (data.isLoggedIn) {
-            // ✅ เปลี่ยนเป็น Logout Link (GET) ชี้ไปที่ API โดยตรง
-            authBtn.textContent = 'ออกจากระบบ';
-            authBtn.className = 'btn-nav btn-danger';
-            authBtn.href = '/api/logout';
+            if (data.isLoggedIn) {
+                authBtn.textContent = 'ออกจากระบบ';
+                authBtn.className = 'btn-nav btn-danger';
+                authBtn.href = '/api/logout';
+            } else {
+                authBtn.textContent = 'เข้าสู่ระบบ';
+                authBtn.className = 'btn-nav btn-accent';
+                authBtn.href = '/login.html';
+            }
             authBtn.style.display = 'inline-flex';
-        } else {
-            // ปุ่ม Login ปกติ
-            authBtn.textContent = 'เข้าสู่ระบบ';
-            authBtn.className = 'btn-nav btn-accent';
-            authBtn.href = '/login.html';
-            authBtn.style.display = 'inline-flex';
+        } catch (err) {
+            console.error("Auth check failed:", err);
         }
-    } catch (err) {
-        console.error("Auth check failed:", err);
     }
 });

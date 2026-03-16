@@ -3,20 +3,19 @@ async function loadHistory() {
         const res = await fetch('/api/history');
         const data = await res.json();
         const table = document.getElementById('history-table');
-        
+        if (!table) return;
+
         table.innerHTML = "";
-        
-        // กรองข้อมูลเฉพาะวันที่เลือก (ถ้ามี)
         const dateFilter = document.getElementById('date-filter').value;
 
-        Object.keys(data).reverse().forEach(key => {
-            const item = data[key];
-            
-            let p = (typeof item === 'object') ? item.percentage : item;
+        // ข้อมูลจาก API เป็น Array อยู่แล้ว สามารถวนลูปได้เลย
+        // .reverse() เพื่อเอาข้อมูลล่าสุดขึ้นก่อน
+        data.reverse().forEach(item => {
+            let p = (typeof item === 'object' && item !== null) ? item.percentage : item;
             let t = (typeof item === 'object' && item.timestamp) ? item.timestamp : "บันทึกเก่า";
             let n = (typeof item === 'object') ? item.is_near : false;
 
-            // ถ้ามีการเลือกวันที่ และวันที่ไม่ตรงกัน ให้ข้ามไป
+            // กรองวันที่
             if (dateFilter && !t.includes(dateFilter)) return;
 
             table.innerHTML += `
@@ -35,5 +34,27 @@ async function loadHistory() {
     }
 }
 
-// โหลดครั้งแรกตอนเปิดหน้า
-loadHistory();
+// ระบบจัดการปุ่ม Navbar (Login/Logout)
+document.addEventListener('DOMContentLoaded', async () => {
+    loadHistory();
+
+    const authBtn = document.getElementById('auth-btn');
+    if (!authBtn) return;
+
+    try {
+        const res = await fetch('/api/check-auth');
+        const data = await res.json();
+
+        if (data.isLoggedIn) {
+            authBtn.textContent = 'ออกจากระบบ';
+            authBtn.className = 'btn-nav btn-danger';
+            authBtn.href = '/api/logout';
+        } else {
+            authBtn.textContent = 'เข้าสู่ระบบ';
+            authBtn.className = 'btn-nav btn-accent';
+            authBtn.href = '/login.html';
+        }
+    } catch (err) {
+        console.error("Auth check failed:", err);
+    }
+});
