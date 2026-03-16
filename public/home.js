@@ -38,3 +38,41 @@ setInterval(() => {
     const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     document.getElementById('realtime-date').innerText = now.toLocaleDateString('th-TH', dateOptions);
 }, 1000);
+
+// ตรวจสอบสถานะล็อกอินและจัดการปุ่ม Navbar
+document.addEventListener('DOMContentLoaded', async () => {
+    const authBtn = document.getElementById('auth-btn');
+    if (!authBtn) return;
+
+    try {
+        const res = await fetch('/api/check-auth');
+        const data = await res.json();
+
+        if (data.isLoggedIn) {
+            // กรณีเข้าสู่ระบบแล้ว
+            authBtn.textContent = 'ออกจากระบบ';
+            authBtn.className = 'btn-nav btn-danger';
+            authBtn.href = '#';
+            authBtn.style.display = 'inline-flex';
+            
+            // เปลี่ยน Event ให้ออกจากระบบผ่าน API
+            authBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                authBtn.textContent = 'กำลังออก...';
+                authBtn.style.opacity = '0.7';
+                authBtn.style.pointerEvents = 'none';
+                
+                await fetch('/api/logout', { method: 'POST' });
+                window.location.reload();
+            });
+        } else {
+            // กรณียังไม่เข้าสู่ระบบ
+            authBtn.textContent = 'เข้าสู่ระบบ';
+            authBtn.className = 'btn-nav btn-accent';
+            authBtn.href = '/login.html';
+            authBtn.style.display = 'inline-flex';
+        }
+    } catch (err) {
+        console.error("Auth check failed:", err);
+    }
+});

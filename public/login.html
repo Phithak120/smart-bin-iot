@@ -1,42 +1,42 @@
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>System Login</title>
+    <meta name="description" content="Smart Bin — เข้าสู่ระบบจัดการถังขยะอัจฉริยะ">
+    <title>Smart Bin · เข้าสู่ระบบ</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-    <div class="scanline"></div>
-    <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-        <form id="loginForm" class="main-card" style="width: 100%; max-width: 400px; padding: 40px;">
-            <h5 class="fw-bold mb-4 text-center"
-                style="color: var(--cyan); text-shadow: 0 0 15px var(--cyan-glow); font-size: 20px;">
-                SYSTEM AUTHORIZATION
-            </h5>
-            <hr>
-            <div class="mb-4 mt-4">
-                <label class="form-label text-muted small" style="letter-spacing: 2px;">USERNAME</label>
-                <input type="text" id="username" class="form-control text-center" placeholder="ป้อนชื่อผู้ใช้" required>
+
+    <div class="login-wrap">
+        <form id="loginForm" class="login-card" autocomplete="off">
+
+            <div class="login-logo">
+                <div class="login-logo-icon-svg">
+                    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+                        <rect width="48" height="48" rx="14" fill="var(--accent-dim)"/>
+                        <path d="M16 20h16M18 20l1.5 12h9l1.5-12" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M21 20v-3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div class="login-logo-title">Smart Bin</div>
+                <div class="login-logo-sub">IoT Waste Management System</div>
             </div>
-            <div class="mb-4">
-                <label class="form-label text-muted small" style="letter-spacing: 2px;">PASSWORD</label>
-                <input type="password" id="password" class="form-control text-center" placeholder="ป้อนรหัสผ่าน"
-                    required>
+
+            <div class="form-field">
+                <label for="username">Username</label>
+                <input type="text" id="username" placeholder="ชื่อผู้ใช้" required autocomplete="username">
             </div>
-            <button type="submit" class="btn btn-outline-light w-100 py-3 mt-2"
-                style="border-color: var(--cyan); color: var(--cyan); font-size: 14px;">
-                [ ยืนยันตัวตน ]
-            </button>
-            <div id="status-msg" class="mt-3 text-center"
-                style="display: none; font-family: var(--mono); font-size: 13px;"></div>
-            <div class="mt-4 text-center">
-                <a href="/" class="text-muted small text-decoration-none" style="font-family: var(--mono);">&lt;&lt;
-                    กลับหน้าหลัก</a>
+            <div class="form-field">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="รหัสผ่าน" required autocomplete="current-password">
             </div>
+
+            <button type="submit" class="login-btn">เข้าสู่ระบบ</button>
+
+            <div id="status-msg" class="login-status"></div>
         </form>
     </div>
 
@@ -48,8 +48,13 @@
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const statusMsg = document.getElementById('status-msg');
+            const btn = e.target.querySelector('button[type="submit"]');
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
+
+            btn.disabled = true;
+            btn.textContent = 'กำลังตรวจสอบ...';
+            statusMsg.style.display = 'none';
 
             try {
                 const response = await fetch('/api/login', {
@@ -60,26 +65,28 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    // 🟢 แก้ไข: แสดงข้อความแทน Alert และหน่วงเวลา
                     statusMsg.style.display = 'block';
-                    statusMsg.style.color = 'var(--cyan)';
-                    statusMsg.innerText = '🔓 ยืนยันตัวตนสำเร็จ กำลังเข้าสู่ระบบ...';
-
-                    setTimeout(() => {
-                        window.location.href = redirectUrl;
-                    }, 1200);
+                    statusMsg.style.background = 'var(--green-dim)';
+                    statusMsg.style.color = 'var(--green)';
+                    statusMsg.textContent = 'เข้าสู่ระบบสำเร็จ กำลังโหลด...';
+                    setTimeout(() => { window.location.href = redirectUrl; }, 1000);
                 } else {
                     statusMsg.style.display = 'block';
-                    statusMsg.style.color = '#ff4d4d';
-                    statusMsg.innerText = '❌ รหัสผ่านไม่ถูกต้อง';
+                    statusMsg.style.background = 'var(--red-dim)';
+                    statusMsg.style.color = 'var(--red)';
+                    statusMsg.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+                    btn.disabled = false;
+                    btn.textContent = 'เข้าสู่ระบบ';
                 }
             } catch (error) {
                 statusMsg.style.display = 'block';
-                statusMsg.style.color = '#ff4d4d';
-                statusMsg.innerText = '⚠️ ระบบขัดข้อง กรุณาลองใหม่';
+                statusMsg.style.background = 'var(--red-dim)';
+                statusMsg.style.color = 'var(--red)';
+                statusMsg.textContent = 'ระบบขัดข้อง กรุณาลองใหม่อีกครั้ง';
+                btn.disabled = false;
+                btn.textContent = 'เข้าสู่ระบบ';
             }
         });
     </script>
 </body>
-
 </html>

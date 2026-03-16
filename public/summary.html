@@ -1,48 +1,113 @@
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Bin Summary</title>
+    <meta name="description" content="Smart Bin — วิเคราะห์ข้อมูลถังขยะ: ปริมาณขยะและความถี่การเปิดฝา">
+    <title>Smart Bin · วิเคราะห์ข้อมูล</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
-    <div class="scanline"></div>
 
-    <nav class="navbar navbar-dark sticky-top shadow-sm">
+    <nav class="navbar navbar-dark sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="/">📊 Summary</a>
-            <a href="/" class="btn btn-outline-light btn-sm">กลับหน้าหลัก</a>
+            <a class="navbar-brand" href="/">
+                <span class="brand-dot"></span>
+                วิเคราะห์ข้อมูล
+            </a>
+            <div class="nav-actions">
+                <a href="/" class="btn-nav">หน้าหลัก</a>
+                <a href="/api/logout" class="btn-nav btn-danger">ออกจากระบบ</a>
+            </div>
         </div>
-        <a href="/api/logout" class="btn btn-outline-light btn-sm"
-            style="border-color: var(--danger); color: var(--danger);">ออกจากระบบ</a>
     </nav>
 
-    <div class="container mt-4 text-center">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="main-card">
-                    <h5 class="fw-bold mb-4">กราฟวิเคราะห์ปริมาณขยะ</h5>
+    <!-- TAB BAR -->
+    <div class="tab-bar-wrap">
+        <div class="tab-bar" role="tablist">
+            <button class="tab-btn active" id="tab-trash-btn" role="tab"
+                    aria-selected="true" onclick="switchTab('trash')">
+                ปริมาณขยะ
+            </button>
+            <button class="tab-btn" id="tab-lid-btn" role="tab"
+                    aria-selected="false" onclick="switchTab('lid')">
+                ความถี่เปิดฝา
+            </button>
+        </div>
+    </div>
 
-                    <div style="height: 350px; position: relative;">
-                        <canvas id="myChart"></canvas>
+    <div class="page-wrap">
+
+        <!-- TAB: TRASH -->
+        <div class="tab-pane active" id="pane-trash" role="tabpanel">
+            <div class="card">
+                <div class="card-title">
+                    <span class="card-title-icon">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    </span>
+                    กราฟปริมาณขยะ
+                </div>
+                <div class="chart-wrap">
+                    <canvas id="trashChart"></canvas>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-card">
+                        <span class="stat-label">Average</span>
+                        <span class="stat-val" id="stat-avg">—</span>
                     </div>
-
-                    <div id="analysis-text"
-                        class="alert mt-4 text-start d-flex align-items-center justify-content-center gap-3">
-                        <span class="spinner-border spinner-border-sm text-success" role="status"
-                            aria-hidden="true"></span>
-                        กำลังรวบรวมข้อมูล...
+                    <div class="stat-card">
+                        <span class="stat-label">Latest</span>
+                        <span class="stat-val" id="stat-latest">—</span>
+                    </div>
+                    <div class="stat-card stat-card--full">
+                        <span class="stat-label">Trend</span>
+                        <span class="stat-val" id="stat-trend" style="font-size:13px;">กำลังโหลด...</span>
                     </div>
                 </div>
             </div>
+            <div id="analysis-text" class="alert mt-2 d-flex align-items-center gap-3">
+                <span class="spinner-border spinner-border-sm" role="status" id="trash-spinner"></span>
+                กำลังรวบรวมข้อมูล...
+            </div>
         </div>
+
+        <!-- TAB: LID -->
+        <div class="tab-pane" id="pane-lid" role="tabpanel">
+            <div class="card">
+                <div class="card-title">
+                    <span class="card-title-icon">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </span>
+                    ความถี่การเปิดฝา (รายชั่วโมง)
+                </div>
+                <div class="chart-wrap">
+                    <canvas id="lidChart"></canvas>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-card">
+                        <span class="stat-label">Total</span>
+                        <span class="stat-val" id="stat-lid-total">—</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">Peak Hour</span>
+                        <span class="stat-val" id="stat-lid-peak" style="font-size:12px;">—</span>
+                    </div>
+                    <div class="stat-card stat-card--full">
+                        <span class="stat-label">Status</span>
+                        <span class="stat-val" id="stat-lid-status" style="font-size:13px;">กำลังโหลด...</span>
+                    </div>
+                </div>
+            </div>
+            <div id="lid-analysis-text" class="alert mt-2 d-flex align-items-center gap-3">
+                <span class="spinner-border spinner-border-sm" role="status" id="lid-spinner"></span>
+                กำลังรวบรวมข้อมูลการเปิดฝา...
+            </div>
+        </div>
+
     </div>
+
     <script src="summary.js"></script>
 </body>
-
 </html>
