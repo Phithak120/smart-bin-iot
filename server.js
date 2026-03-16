@@ -23,7 +23,7 @@ app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'home.htm
 app.use('/api', apiRoutes);
 
 // 5. เปิดเครื่อง Server
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`=================================`);
     console.log(`🚀 System Online at Port: ${PORT}`);
