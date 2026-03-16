@@ -1,45 +1,51 @@
-// ฟังก์ชันดึงข้อมูลจาก Server
+// ฟังก์ชันดึงข้อมูลเซนเซอร์แบบ Real-time
 async function fetchSensorData() {
     try {
         const res = await fetch('/api/latest');
         const data = await res.json();
         
-        // 1. อัปเดตระดับขยะ
+        // 1. อัปเดต Progress Bar ระดับขยะ
         const bar = document.getElementById('trash-bar');
-        const p = data.percentage || 0;
+        if (bar) {
+            const p = data.percentage || 0;
+            bar.style.width = p + '%';
+            bar.innerText = p + '%';
+            
+            // เปลี่ยนสีตามความจุ
+            if (p >= 90) bar.className = "progress-bar progress-bar-striped progress-bar-animated bg-danger";
+            else if (p >= 50) bar.className = "progress-bar progress-bar-striped progress-bar-animated bg-warning text-dark";
+            else bar.className = "progress-bar progress-bar-striped progress-bar-animated bg-success";
+        }
         
-        bar.style.width = p + '%';
-        bar.innerText = p + '%';
-        
-        if (p >= 90) bar.className = "progress-bar progress-bar-striped progress-bar-animated bg-danger";
-        else if (p >= 50) bar.className = "progress-bar progress-bar-striped progress-bar-animated bg-warning text-dark";
-        else bar.className = "progress-bar progress-bar-striped progress-bar-animated bg-success";
-        
-        // 2. อัปเดตสถานะคน
+        // 2. อัปเดตสถานะคน (Proximity)
         const prox = document.getElementById('proximity-status');
-        prox.innerText = data.is_near ? 'พบคนใกล้ถัง' : 'ปกติ';
-        prox.className = data.is_near ? 'badge bg-warning text-dark p-2' : 'badge bg-secondary p-2';
-
+        if (prox) {
+            prox.innerText = data.is_near ? 'พบคนใกล้ถัง' : 'ปกติ';
+            prox.className = data.is_near ? 'badge bg-warning text-dark p-2' : 'badge bg-secondary p-2';
+        }
     } catch (err) { 
         console.error("Update Error:", err); 
     }
 }
 
-// โหลดข้อมูลทันทีเมื่อเปิดหน้าเว็บ (แก้ปัญหาเว็บโหลดข้อมูลช้า)
+// เริ่มต้นดึงข้อมูลและตั้งรอบอัปเดตทุก 3 วินาที
 fetchSensorData();
-
-// จากนั้นค่อยให้มันอัปเดตเองทุกๆ 3 วินาที
 setInterval(fetchSensorData, 3000);
 
-// อัปเดตนาฬิกา
+// ระบบนาฬิกา Real-time
 setInterval(() => {
+    const clockEl = document.getElementById('realtime-clock');
+    const dateEl = document.getElementById('realtime-date');
+    if (!clockEl || !dateEl) return;
+
     const now = new Date();
-    document.getElementById('realtime-clock').innerText = now.toLocaleTimeString('th-TH');
-    const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    document.getElementById('realtime-date').innerText = now.toLocaleDateString('th-TH', dateOptions);
+    clockEl.innerText = now.toLocaleTimeString('th-TH');
+    dateEl.innerText = now.toLocaleDateString('th-TH', { 
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+    });
 }, 1000);
 
-// ตรวจสอบสถานะล็อกอินและจัดการปุ่ม Navbar
+// จัดการสถานะ Navbar (เข้าสู่ระบบ / ออกจากระบบ)
 document.addEventListener('DOMContentLoaded', async () => {
     const authBtn = document.getElementById('auth-btn');
     if (!authBtn) return;
@@ -49,24 +55,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         const data = await res.json();
 
         if (data.isLoggedIn) {
-            // กรณีเข้าสู่ระบบแล้ว
+            // ✅ เปลี่ยนเป็น Logout Link (GET) ชี้ไปที่ API โดยตรง
             authBtn.textContent = 'ออกจากระบบ';
             authBtn.className = 'btn-nav btn-danger';
-            authBtn.href = '#';
+            authBtn.href = '/api/logout';
             authBtn.style.display = 'inline-flex';
-            
-            // เปลี่ยน Event ให้ออกจากระบบผ่าน API
-            authBtn.addEventListener('click', async (e) => {
-                e.preventDefault();
-                authBtn.textContent = 'กำลังออก...';
-                authBtn.style.opacity = '0.7';
-                authBtn.style.pointerEvents = 'none';
-                
-                await fetch('/api/logout', { method: 'POST' });
-                window.location.reload();
-            });
         } else {
-            // กรณียังไม่เข้าสู่ระบบ
+            // ปุ่ม Login ปกติ
             authBtn.textContent = 'เข้าสู่ระบบ';
             authBtn.className = 'btn-nav btn-accent';
             authBtn.href = '/login.html';
