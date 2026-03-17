@@ -1,8 +1,9 @@
-// services/firebaseService.js
 const admin = require("firebase-admin");
 const path = require("path");
 require('dotenv').config();
 
+// ✅ กลับมาเรียกใช้จากไฟล์กุญแจ (JSON) 
+// โดยถอยออกจากโฟลเดอร์ services (../) ไปหาไฟล์ที่อยู่ด้านนอก
 const serviceAccount = require(path.join(__dirname, "../serviceAccountKey.json"));
 
 admin.initializeApp({
@@ -13,12 +14,15 @@ admin.initializeApp({
 const db = admin.database();
 let cachedTrashStatus = { percentage: 0, is_near: false };
 
-// หน้าหลักใช้ตัวนี้ (เรียลไทม์)
+// ดึงข้อมูล Real-time จาก Firebase
 db.ref('trash_status').on('value', (snap) => {
     cachedTrashStatus = snap.val() || { percentage: 0, is_near: false };
+    console.log("🔥 ข้อมูลใหม่จาก Firebase:", cachedTrashStatus);
+}, (error) => {
+    console.error("❌ Firebase Error:", error.message);
 });
 
-// ✅ ต้องส่ง db ออกไปด้วยเพื่อให้หน้า History/Summary ดึงข้อมูลย้อนหลังได้
+// ส่งออก db และฟังก์ชันดึงค่าล่าสุด
 module.exports = { 
     db, 
     getCachedStatus: () => cachedTrashStatus 
