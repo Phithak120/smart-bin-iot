@@ -1,7 +1,7 @@
 #include <WiFi.h>
 #include <FirebaseESP32.h>
 #include <PubSubClient.h> 
-#include "time.h"        
+#include "time.h" 
 
 // --- การตั้งค่า WiFi & Firebase ---
 #define WIFI_SSID "New"
@@ -15,7 +15,7 @@ const int mqtt_port = 1883;
 
 // --- การตั้งค่าเวลา (NTP) ---
 const char* ntpServer = "pool.ntp.org";
-const long gmtOffset_sec = 25200; 
+const long gmtOffset_sec = 25200; // UTC+7
 const int daylightOffset_sec = 0;
 
 FirebaseData fbdo;
@@ -25,11 +25,11 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 
 // --- ตัวแปรจับเวลา ---
-unsigned long lastMillis = 0;
+unsigned long lastTrashMillis = 0;
 unsigned long lastControlMillis = 0;
-unsigned long lastSimMillis = 0; // จับเวลาสำหรับการสุ่มคนเดินผ่าน
+unsigned long lastSimMillis = 0;
 
-bool lastLidState = false; // เก็บสถานะฝาว่าเปิดหรือปิดอยู่
+bool lastLidState = false; // เก็บสถานะคนใกล้ (ที่ผูกกับฝา)
 
 // ฟังก์ชันดึงเวลาปัจจุบัน
 String getTimeString() {
@@ -48,8 +48,6 @@ void reconnectMQTT() {
     if (client.connect(clientId.c_str())) {
       Serial.println("connected");
     } else {
-      Serial.print("failed, rc=");
-      Serial.print(client.state());
       delay(5000);
     }
   }
@@ -71,30 +69,30 @@ void setup() {
 }
 
 void loop() {
-  if (!client.connected()) {
-    reconnectMQTT();
-  }
+  if (!client.connected()) { reconnectMQTT(); }
   client.loop();
 
   // -------------------------------------------------------------------
-  // 1. จำลองคนเดินผ่านถังขยะ (สุ่มทุกๆ 10 วินาที เพื่อเทสกราฟ)
+  // 1. จำลองคนเดินผ่าน (เช็คทุก 10 วินาที และอัปเดต Real-time)
   // -------------------------------------------------------------------
   if (millis() - lastSimMillis > 10000) {
     lastSimMillis = millis();
+    bool currentPersonNear = (random(0, 2) == 1); // สุ่ม 50/50
 
-    bool currentPersonNear = (random(0, 2) == 1); // สุ่ม 50/50 ว่ามีคนเดินมาใกล้ไหม
-
-    // ถ้าฝาเพิ่งเปลี่ยนจาก ปิด -> เปิด
-    if (currentPersonNear == true && lastLidState == false) {
-      String currentTime = getTimeString(); 
-      FirebaseJson lidJson;
-      lidJson.set("event", "opened");
-      lidJson.set("timestamp", currentTime);
-
-      Firebase.push(fbdo, "/lid_history", lidJson); 
-      Serial.println("▶ SIMULATION: คนเดินผ่าน! ยิงข้อมูลการเปิดฝาเข้า /lid_history แล้ว");
+    // ✅ ส่งค่าคนใกล้ขึ้น Firebase ทันทีที่เปลี่ยน (ทำให้หน้าเว็บไม่นิ่ง)
+    if (currentPersonNear != lastLidState) {
+      Firebase.setBool(fbdo, "/trash_status/is_near", currentPersonNear);
+      Serial.println("👤 Person Status Changed: " + String(currentPersonNear ? "NEAR" : "AWAY"));
+      
+      // ถ้าเปลี่ยนเป็น "มีคน" (เปิดฝา) ให้บันทึกประวัติเข้า /lid_history
+      if (currentPersonNear == true) {
+        FirebaseJson lidJson;
+        lidJson.set("event", "opened");
+        lidJson.set("timestamp", getTimeString());
+        Firebase.push(fbdo, "/lid_history", lidJson);
+      }
     }
-    lastLidState = currentPersonNear; // อัปเดตสถานะล่าสุด
+    lastLidState = currentPersonNear;
   }
 
   // -------------------------------------------------------------------
@@ -102,47 +100,43 @@ void loop() {
   // -------------------------------------------------------------------
   if (millis() - lastControlMillis > 2000) {
     lastControlMillis = millis();
-
     if (Firebase.getString(fbdo, "/trash_status/lid_command")) {
       String lid_cmd = fbdo.stringData();
       
-      // ถ้ากดปุ่ม OPEN จากหน้าเว็บ ก็ให้นับเป็นการเปิดฝาเพื่อโชว์ในกราฟด้วย
       if (lid_cmd == "OPEN" && lastLidState == false) {
-        String currentTime = getTimeString(); 
         FirebaseJson lidJson;
         lidJson.set("event", "manual_opened");
-        lidJson.set("timestamp", currentTime);
-        Firebase.push(fbdo, "/lid_history", lidJson); 
-        
-        Serial.println("▶ COMMAND: กดเปิดจากเว็บ! ยิงข้อมูลการเปิดฝาแล้ว");
+        lidJson.set("timestamp", getTimeString());
+        Firebase.push(fbdo, "/lid_history", lidJson);
         lastLidState = true;
-      } 
-      else if (lid_cmd == "CLOSE") {
+      } else if (lid_cmd == "CLOSE") {
         lastLidState = false;
       }
     }
   }
 
   // -------------------------------------------------------------------
-  // 3. ส่วนส่งข้อมูลระดับขยะขึ้น Firebase (ส่งทุก 1 นาที)
+  // 3. ส่วนส่งข้อมูลระดับขยะ (ส่งทุก 1 นาที)
   // -------------------------------------------------------------------
-  if (millis() - lastMillis > 60000 || lastMillis == 0) {
-    lastMillis = millis();
+  if (millis() - lastTrashMillis > 60000 || lastTrashMillis == 0) {
+    lastTrashMillis = millis();
     
-    int trash_val = random(0, 101); // สุ่มระดับขยะ
+    int trash_val = random(0, 101); 
     String currentTime = getTimeString(); 
 
-    FirebaseJson json;
-    json.set("percentage", trash_val);
-    json.set("is_near", lastLidState);
-    json.set("timestamp", currentTime); 
+    // อัปเดตสถานะปัจจุบัน
+    FirebaseJson statusJson;
+    statusJson.set("percentage", trash_val);
+    statusJson.set("is_near", lastLidState);
+    statusJson.set("timestamp", currentTime); 
+    Firebase.updateNode(fbdo, "/trash_status", statusJson); 
 
-    Firebase.updateNode(fbdo, "/trash_status", json); 
-    Firebase.push(fbdo, "/trash_history", json);
+    // เก็บประวัติลง Trash History
+    Firebase.push(fbdo, "/trash_history", statusJson);
 
+    // ส่งผ่าน MQTT
     client.publish("bin/trash_percent", String(trash_val).c_str());
-    client.publish("bin/trash_history", currentTime.c_str());
     
-    Serial.println("--- Routine Data: อัปเดตปริมาณขยะ " + String(trash_val) + "% ---");
+    Serial.println("📊 Trash Updated: " + String(trash_val) + "% at " + currentTime);
   }
 }
