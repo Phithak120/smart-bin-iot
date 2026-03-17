@@ -4,7 +4,7 @@ require('dotenv').config();
 
 // ✅ กลับมาเรียกใช้จากไฟล์กุญแจ (JSON) 
 // โดยถอยออกจากโฟลเดอร์ services (../) ไปหาไฟล์ที่อยู่ด้านนอก
-const serviceAccount = require(path.join(__dirname, "../serviceAccountKey.json"));
+const serviceAccount = require(path.join(__dirname, "../config-db.json"));
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
